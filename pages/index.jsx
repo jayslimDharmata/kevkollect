@@ -53,6 +53,8 @@ const css = `
   .tag-parallel { background: ${DODGER_LIGHT}; color: ${DODGER_DARK}; border: 1px solid ${DODGER_MID}; }
   .tag-insert   { background: #f8f0ff; color: #6b21a8; border: 1px solid #d8b4fe; }
   .tag-rookie   { background: #fff0f0; color: #c0392b; border: 1px solid #f5b8b8; }
+  .tag-auto     { background: #e8f8e8; color: #1a6b3a; border: 1px solid #a8ddb8; }
+  .tag-relic    { background: #fef3e8; color: #b05a00; border: 1px solid #f5c895; }
   .card-btns { display: flex; gap: 8px; margin-top: 10px; }
   .btn-sm { flex: 1; padding: 7px 10px; border-radius: 7px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid; transition: all 0.15s; font-family: 'Source Sans 3', sans-serif; }
   .btn-blue-sm { background: ${DODGER_LIGHT}; border-color: ${DODGER_MID}; color: ${DODGER_BLUE}; }
@@ -133,6 +135,8 @@ function getTags(card, includeRookie = false) {
   const tags = [];
   if (card.Graded && card.Graded.trim()) tags.push({ label: card.Graded.trim(), type: "grade" });
   if (includeRookie && String(card.Rookie || "").toUpperCase() === "Y") tags.push({ label: "RC", type: "rookie" });
+  if (String(card.Auto || "").toUpperCase() === "Y") tags.push({ label: "AUTO", type: "auto" });
+  if (String(card["Patch/Relic"] || "").toUpperCase() === "Y") tags.push({ label: "RELIC", type: "relic" });
   if (card.Parallel && card.Parallel.trim()) tags.push({ label: card.Parallel.trim(), type: "parallel" });
   if (card.Insert && card.Insert.trim()) tags.push({ label: card.Insert.trim(), type: "insert" });
   return tags;
@@ -175,7 +179,7 @@ function Modal({ card, onClose, ebayUrlFn }) {
         {tags.length > 0 && <div className="tags" style={{ marginBottom: 12 }}>{tags.map((t, i) => <span key={i} className={`tag tag-${t.type}`}>{t.label}</span>)}</div>}
         <div className="divider" />
         <div className="detail-grid">
-          {[["Number", card.Number], ["Insert", card.Insert], ["Parallel", card.Parallel], ["Graded", card.Graded], ["Rookie", card.Rookie === "Y" ? "Yes" : null], ["Comp", card.Comp], ["Comp Date", card["Comp Date"]]].filter(([, v]) => v && v.trim()).map(([k, v]) => (
+          {[["Number", card.Number], ["Insert", card.Insert], ["Parallel", card.Parallel], ["Graded", card.Graded], ["Auto", card.Auto === "Y" ? "Yes" : null], ["Patch/Relic", card["Patch/Relic"] === "Y" ? "Yes" : null], ["Rookie", card.Rookie === "Y" ? "Yes" : null], ["Comp", card.Comp], ["Comp Date", card["Comp Date"]]].filter(([, v]) => v && v.trim()).map(([k, v]) => (
             <div className="detail-field" key={k}><label>{k}</label><span>{v}</span></div>
           ))}
         </div>
@@ -211,6 +215,8 @@ function CollectionGrid({ cards, isLive, title, ebayUrlFn, includeRookie }) {
     .filter(c => {
       if (filter === "all") return true;
       if (filter === "graded") return c.Graded && c.Graded.trim();
+      if (filter === "auto") return String(c.Auto || "").toUpperCase() === "Y";
+      if (filter === "relic") return String(c["Patch/Relic"] || "").toUpperCase() === "Y";
       if (filter === "parallel") return c.Parallel && c.Parallel.trim();
       if (filter === "insert") return c.Insert && c.Insert.trim();
       if (filter === "rookie") return String(c.Rookie || "").toUpperCase() === "Y";
@@ -249,6 +255,8 @@ function CollectionGrid({ cards, isLive, title, ebayUrlFn, includeRookie }) {
         <select className="sel" value={filter} onChange={e => setFilter(e.target.value)}>
           <option value="all">Filter: All Cards</option>
           <option value="graded">Graded Only</option>
+          <option value="auto">Autos Only</option>
+          <option value="relic">Patch/Relic Only</option>
           <option value="parallel">Parallels Only</option>
           <option value="insert">Inserts Only</option>
           {includeRookie && <option value="rookie">Rookies Only</option>}
