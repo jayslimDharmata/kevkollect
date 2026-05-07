@@ -114,8 +114,16 @@ const css = `
 `;
 
 function buildEbayUrl(card, soldOnly) {
-  const parts = ["Shohei Ohtani", card.Year, card.Set, card.Insert, card.Parallel, card.Graded]
-    .map(s => String(s || "").trim()).filter(Boolean);
+  const parts = [
+    "Shohei Ohtani",
+    card.Year,
+    card.Set,
+    card.Insert,
+    card.Parallel,
+    card.Graded,
+    String(card.Auto || "").toUpperCase() === "Y" ? "auto autograph" : "",
+    String(card["Patch/Relic"] || "").toUpperCase() === "Y" ? "patch relic" : "",
+  ].map(s => String(s || "").trim()).filter(Boolean);
   const q = encodeURIComponent(parts.join(" "));
   return soldOnly
     ? `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1&_sop=13`
@@ -123,8 +131,17 @@ function buildEbayUrl(card, soldOnly) {
 }
 
 function buildEbayUrlGeneric(card, soldOnly) {
-  const parts = [card.Name, card.Year, card.Set, card.Insert, card.Parallel, card.Graded]
-    .map(s => String(s || "").trim()).filter(Boolean);
+  const parts = [
+    card.Name,
+    card.Year,
+    card.Set,
+    card.Insert,
+    card.Parallel,
+    card.Graded,
+    String(card.Auto || "").toUpperCase() === "Y" ? "auto autograph" : "",
+    String(card["Patch/Relic"] || "").toUpperCase() === "Y" ? "patch relic" : "",
+    String(card.Rookie || "").toUpperCase() === "Y" ? "rookie" : "",
+  ].map(s => String(s || "").trim()).filter(Boolean);
   const q = encodeURIComponent(parts.join(" "));
   return soldOnly
     ? `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1&_sop=13`
@@ -233,13 +250,17 @@ function CollectionGrid({ cards, isLive, title, ebayUrlFn, includeRookie }) {
       return 0;
     });
 
+  const totalValue = filtered.reduce((sum, c) => sum + parseComp(c.Comp), 0);
+  const totalDisplay = totalValue > 0 ? `$${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : null;
+
   return (
     <div>
       <div className="coll-header">
         <div className="coll-title">{title}</div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <span className={`badge ${isLive ? "badge-live" : ""}`}>{isLive ? "● Live" : `${cards.length} cards`}</span>
           {isLive && <span className="badge">{filtered.length} of {cards.length} cards</span>}
+          {totalDisplay && <span className="badge" style={{ color: "#1a7a40", background: "#f0fff4", borderColor: "#a8e6c0" }}>Total: {totalDisplay}</span>}
         </div>
       </div>
       <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
