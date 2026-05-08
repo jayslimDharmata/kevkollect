@@ -114,16 +114,8 @@ const css = `
 `;
 
 function buildEbayUrl(card, soldOnly) {
-  const parts = [
-    "Shohei Ohtani",
-    card.Year,
-    card.Set,
-    card.Insert,
-    card.Parallel,
-    card.Graded,
-    String(card.Auto || "").toUpperCase() === "Y" ? "auto autograph" : "",
-    String(card["Patch/Relic"] || "").toUpperCase() === "Y" ? "patch relic" : "",
-  ].map(s => String(s || "").trim()).filter(Boolean);
+  const parts = ["Shohei Ohtani", card.Year, card.Set, card.Insert, card.Parallel, card.Graded]
+    .map(s => String(s || "").trim()).filter(Boolean);
   const q = encodeURIComponent(parts.join(" "));
   return soldOnly
     ? `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1&_sop=13`
@@ -131,21 +123,27 @@ function buildEbayUrl(card, soldOnly) {
 }
 
 function buildEbayUrlGeneric(card, soldOnly) {
+  const parts = [card.Name, card.Year, card.Set, card.Insert, card.Parallel, card.Graded]
+    .map(s => String(s || "").trim()).filter(Boolean);
+  const q = encodeURIComponent(parts.join(" "));
+  return soldOnly
+    ? `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1&_sop=13`
+    : `https://www.ebay.com/sch/i.html?_nkw=${q}&_sop=15`;
+}
+
+function build130PointUrl(card) {
   const parts = [
-    card.Name,
+    card.Name || "Shohei Ohtani",
     card.Year,
     card.Set,
     card.Insert,
     card.Parallel,
     card.Graded,
-    String(card.Auto || "").toUpperCase() === "Y" ? "auto autograph" : "",
-    String(card["Patch/Relic"] || "").toUpperCase() === "Y" ? "patch relic" : "",
+    String(card.Auto || "").toUpperCase() === "Y" ? "auto" : "",
+    String(card["Patch/Relic"] || "").toUpperCase() === "Y" ? "patch" : "",
     String(card.Rookie || "").toUpperCase() === "Y" ? "rookie" : "",
   ].map(s => String(s || "").trim()).filter(Boolean);
-  const q = encodeURIComponent(parts.join(" "));
-  return soldOnly
-    ? `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1&_sop=13`
-    : `https://www.ebay.com/sch/i.html?_nkw=${q}&_sop=15`;
+  return `https://130point.com/sales/?query=${encodeURIComponent(parts.join(" "))}`;
 }
 
 function getTags(card, includeRookie = false) {
@@ -202,8 +200,9 @@ function Modal({ card, onClose, ebayUrlFn }) {
         </div>
         <div className="divider" />
         <div className="modal-btns">
-          <button className="btn btn-blue" onClick={() => window.open(ebayUrlFn(card, true), "_blank")}>📊 Sold Comps</button>
+          <button className="btn btn-blue" onClick={() => window.open(ebayUrlFn(card, true), "_blank")}>📊 eBay Sold</button>
           <button className="btn btn-outline" onClick={() => window.open(ebayUrlFn(card, false), "_blank")}>🛒 Active Listings</button>
+          <button className="btn" style={{background:"#fff8f0",borderColor:"#f5c895",color:"#b05a00"}} onClick={() => window.open(build130PointUrl(card), "_blank")}>🔍 130pt Comps</button>
           <button className="btn btn-green" onClick={genListing} disabled={loading}>{loading ? "Writing..." : "✍️ Generate Listing"}</button>
         </div>
         {listing && (
@@ -250,17 +249,13 @@ function CollectionGrid({ cards, isLive, title, ebayUrlFn, includeRookie }) {
       return 0;
     });
 
-  const totalValue = filtered.reduce((sum, c) => sum + parseComp(c.Comp), 0);
-  const totalDisplay = totalValue > 0 ? `$${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : null;
-
   return (
     <div>
       <div className="coll-header">
         <div className="coll-title">{title}</div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <span className={`badge ${isLive ? "badge-live" : ""}`}>{isLive ? "● Live" : `${cards.length} cards`}</span>
           {isLive && <span className="badge">{filtered.length} of {cards.length} cards</span>}
-          {totalDisplay && <span className="badge" style={{ color: "#1a7a40", background: "#f0fff4", borderColor: "#a8e6c0" }}>Total: {totalDisplay}</span>}
         </div>
       </div>
       <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
@@ -299,7 +294,8 @@ function CollectionGrid({ cards, isLive, title, ebayUrlFn, includeRookie }) {
                 {card.Comp && <div className="card-comp">{card.Comp}</div>}
                 {tags.length > 0 && <div className="tags">{tags.map((t, j) => <span key={j} className={`tag tag-${t.type}`}>{t.label}</span>)}</div>}
                 <div className="card-btns" onClick={e => e.stopPropagation()}>
-                  <button className="btn-sm btn-blue-sm" onClick={() => window.open(ebayUrlFn(card, true), "_blank")}>📊 Sold Comps</button>
+                  <button className="btn-sm btn-blue-sm" onClick={() => window.open(ebayUrlFn(card, true), "_blank")}>📊 eBay</button>
+                  <button className="btn-sm" style={{flex:1,padding:"7px 10px",borderRadius:7,fontSize:11,fontWeight:600,cursor:"pointer",border:"1.5px solid #f5c895",background:"#fff8f0",color:"#b05a00",fontFamily:"'Source Sans 3',sans-serif"}} onClick={() => window.open(build130PointUrl(card), "_blank")}>🔍 130pt</button>
                   <button className="btn-sm btn-grey-sm" onClick={() => setSel(card)}>Details →</button>
                 </div>
               </div>
