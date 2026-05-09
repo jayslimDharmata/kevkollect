@@ -233,13 +233,17 @@ function CollectionGrid({ cards, isLive, title, ebayUrlFn, includeRookie }) {
       return 0;
     });
 
+  const totalValue = filtered.reduce((sum, c) => sum + parseComp(c.Comp), 0);
+  const totalDisplay = totalValue > 0 ? `$${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : null;
+
   return (
     <div>
       <div className="coll-header">
         <div className="coll-title">{title}</div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <span className={`badge ${isLive ? "badge-live" : ""}`}>{isLive ? "● Live" : `${cards.length} cards`}</span>
           {isLive && <span className="badge">{filtered.length} of {cards.length} cards</span>}
+          {totalDisplay && <span className="badge" style={{ color: "#1a7a40", background: "#f0fff4", borderColor: "#a8e6c0" }}>Total: {totalDisplay}</span>}
         </div>
       </div>
       <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
