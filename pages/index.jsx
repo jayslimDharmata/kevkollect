@@ -361,7 +361,7 @@ function OhtaniTab() {
     </div>
   );
 
-  return <CollectionGrid cards={cards} isLive={isLive} title="Book of Ohtani" ebayUrlFn={buildEbayUrl} includeRookie={false} />;
+  return <CollectionGrid cards={cards} isLive={isLive} title="Book of Shohei" ebayUrlFn={buildEbayUrl} includeRookie={false} />;
 }
 
 function EbayTab() {
@@ -408,7 +408,7 @@ export default function KevKollect() {
           <img src={METS} className="header-logo" alt="NY Mets" />
         </div>
         <div className="tabs">
-          {[{ id: "pc", label: "🗂 My Collection" }, { id: "ohtani", label: "⚾ Book of Ohtani" }, { id: "ebay", label: "🔍 eBay Search" }].map(t => (
+          {[{ id: "pc", label: "🗂 My Collection" }, { id: "ohtani", label: "⚾ Book of Shohei" }, { id: "ebay", label: "🔍 eBay Search" }].map(t => (
             <button key={t.id} className={`tab ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>{t.label}</button>
           ))}
         </div>
